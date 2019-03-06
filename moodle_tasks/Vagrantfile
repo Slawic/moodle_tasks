@@ -1,0 +1,56 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+DBNAME="moodle"
+DBUSER="UserDB"
+DBPASS="PassDB"
+ADMUSER="Moodle"
+ADMPASS="Passw0rd"
+
+
+nodes = [
+  { :hostname => 'db',   :ip => '192.168.56.101', :host_type => 'db'  },
+  { :hostname => 'web1', :ip => '192.168.56.102', :host_type => 'web' },
+  { :hostname => 'web2', :ip => '192.168.56.103', :host_type => 'web' }, 
+  { :hostname => 'lb',   :ip => '192.168.56.100', :host_type => 'lb'  },  
+]
+
+Vagrant.configure("2") do |config|
+
+config.vm.provider "virtualbox" do |vb|
+  vb.memory="1024"
+end
+
+config.vm.define "db" do |db|
+  db.vm.box = "centos/7"
+ # db.vm.hostname = nodes[0][:hostname]
+ # db.vm.network "forwarded_port",guest: 80, host:8085
+  db.vm.network "private_network", ip: "192.168.56.101"
+ # db.vm.network "public_network"
+  db.vm.provision "shell", path: "scenario-db.sh"
+end
+config.vm.define "web1" do |web1|
+  web1.vm.box = "centos/7"
+ # web1.vm.hostname = nodes[1][:hostname]
+ # web1.vm.network "forwarded_port",guest: 80, host:8083
+  web1.vm.network "private_network", ip: "192.168.56.102"
+ # web1.vm.network "public_network"
+  web1.vm.provision "shell", path: "scenario-web.sh"
+end
+config.vm.define "web2" do |web2|
+  web2.vm.box = "centos/7"
+ # web2.vm.hostname = nodes[2][:hostname]
+ # web2.vm.network "forwarded_port",guest: 80, host:8084
+  web2.vm.network "private_network", ip: "192.168.56.103"
+ # web2.vm.network "public_network"
+  web2.vm.provision "shell", path: "scenario-web.sh"
+end
+config.vm.define "lb" do |lb|
+  lb.vm.box = "centos/7"
+ # lb.vm.hostname = nodes[3][:hostname]
+ # lb.vm.network "forwarded_port",guest: 80, host:8081
+  lb.vm.network "private_network", ip: "192.168.56.100"
+ # lb.vm.network "public_network"
+  lb.vm.provision "shell", path: "scenario-lb.sh"
+end
+
+end
